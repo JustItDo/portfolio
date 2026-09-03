@@ -1,0 +1,169 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+	const entries = await getCollection("case-studies");
+	return entries.map((entry) => ({
+		params: { slug: entry.id },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, summary, scale, stack, status, codeVisibility, codeNote, repoUrl, screenshots } = entry.data;
+---
+
+<Layout title={`${title} — case study — Jakub`} description={summary}>
+	<article
+		data-sekcja="case-study"
+		class="relative px-[6vw] py-24 md:py-32 max-w-[76ch] mx-auto flex flex-col gap-10"
+	>
+		<a
+			href="/#projekty"
+			class="text-[13px] text-muted hover:text-accent transition-colors w-fit"
+		>
+			&larr; wróć do projektów
+		</a>
+
+		<header class="flex flex-col gap-5">
+			<p class="cmd-line text-accent text-[13px] before:content-['$_'] before:opacity-70">
+				<span data-cmd>cat case-studies/{entry.id}.md</span>
+			</p>
+			<h1 class="text-[clamp(28px,4vw,42px)] font-semibold text-ink" transition:name={`tytul-${entry.id}`}>
+				{title}
+			</h1>
+			<p class="text-[14.5px] leading-[1.7] text-ink/85 max-w-[60ch]">{summary}</p>
+
+			<dl class="flex flex-wrap gap-x-8 gap-y-2 text-[12px] uppercase tracking-wide text-muted mt-2">
+				{
+					scale && (
+						<div class="flex gap-1.5">
+							<dt class="font-semibold">Skala:</dt>
+							<dd class="normal-case">{scale}</dd>
+						</div>
+					)
+				}
+				<div class="flex gap-1.5">
+					<dt class="font-semibold">Status:</dt>
+					<dd class="normal-case">{status}</dd>
+				</div>
+				<div class="flex gap-1.5">
+					<dt class="font-semibold">Kod:</dt>
+					<dd class="normal-case">{codeVisibility === "private" ? "repozytorium prywatne" : "publiczny"}</dd>
+				</div>
+			</dl>
+
+			<div class="flex flex-wrap gap-2">
+				{
+					stack.map((t) => (
+						<span
+							data-hover-scramble
+							class="rounded-[3px] border border-line px-2 py-0.5 text-[11px] uppercase tracking-wide text-muted"
+						>
+							{t}
+						</span>
+					))
+				}
+			</div>
+		</header>
+
+		<div class="case-study-content flex flex-col gap-4 border-t border-line pt-10">
+			<Content />
+		</div>
+
+		{
+			codeNote && (
+				<aside class="rounded-[3px] border border-line bg-ink/[0.025] p-5" aria-label="Dostępność kodu projektu">
+					<p class="text-accent text-[13px] before:content-['$_'] before:opacity-70">git status --public</p>
+					<p class="mt-3 text-[13.5px] leading-[1.7] text-ink/80">{codeNote}</p>
+				</aside>
+			)
+		}
+
+		{
+			screenshots.length > 0 && (
+				<div class="flex flex-col gap-4 border-t border-line pt-10">
+					<p class="text-accent text-[13px] before:content-['$_'] before:opacity-70">ls screenshots/</p>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						{screenshots.map((s) => (
+							<img src={s.src} alt={s.alt} class="rounded-[3px] border border-line w-full" loading="lazy" />
+						))}
+					</div>
+				</div>
+			)
+		}
+
+		<div class="flex flex-wrap gap-3.5 border-t border-line pt-10">
+			{
+				repoUrl && (
+					<a
+						href={repoUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="rounded-[3px] px-[18px] py-3 text-[13px] border border-accent text-accent transition-[background-color,transform] hover:bg-accent/10 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
+					>
+						&gt; zobacz_repo() &#8599;
+					</a>
+				)
+			}
+			<a
+				href="/#kontakt"
+				class="rounded-[3px] px-[18px] py-3 text-[13px] border border-accent bg-accent text-accent-ink font-semibold transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
+			>
+				&gt; zapytaj_o_projekt()
+			</a>
+		</div>
+	</article>
+</Layout>
+
+<script>
+	import { typeCommand } from "../../scripts/efekty";
+
+	function init() {
+		const cmd = document.querySelector("article[data-sekcja='case-study'] [data-cmd]");
+		if (cmd) typeCommand(cmd, 14);
+	}
+
+	document.addEventListener("astro:page-load", init);
+</script>
+
+<style>
+	.case-study-content :global(h2) {
+		color: var(--color-accent);
+		font-size: 16px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		margin-top: 0.5rem;
+	}
+
+	.case-study-content :global(p) {
+		font-size: 14.5px;
+		line-height: 1.75;
+		color: color-mix(in srgb, var(--color-ink) 85%, transparent);
+	}
+
+	.case-study-content :global(ul) {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		font-size: 14.5px;
+		line-height: 1.6;
+		color: color-mix(in srgb, var(--color-ink) 85%, transparent);
+		padding-left: 1.1rem;
+		list-style: none;
+	}
+
+	.case-study-content :global(li) {
+		position: relative;
+	}
+
+	.case-study-content :global(li::before) {
+		content: "›";
+		color: var(--color-accent);
+		position: absolute;
+		left: -1.1rem;
+	}
+</style>

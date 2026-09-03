@@ -1,0 +1,87 @@
+---
+// Velocity-marquee: pasek-separator między sekcjami. Dryfuje stale w lewo,
+// a prędkość scrolla dodaje mu pędu (kierunek podąża za scrollem).
+// Czysto dekoracyjny (aria-hidden); przy reduced-motion stoi w miejscu.
+const frazy = [
+	"automatyzacja procesów",
+	"excel → aplikacja",
+	"papier → aplikacja",
+	"ai-assisted dev",
+	"od problemu do narzędzia",
+];
+---
+
+<aside id="marquee" aria-hidden="true" class="overflow-hidden border-t border-line py-4 select-none">
+	<div id="marquee-track" class="flex w-max whitespace-nowrap will-change-transform">
+		{
+			[0, 1].map(() => (
+				<span class="kopia flex-none text-[12.5px] uppercase tracking-[0.25em] text-muted">
+					{frazy.map((f) => (
+						<>
+							{f}
+							<i class="px-6 not-italic text-accent">·</i>
+						</>
+					))}
+				</span>
+			))
+		}
+	</div>
+</aside>
+
+<script>
+	import gsap from "gsap";
+	import { reduceMotion } from "../scripts/efekty";
+
+	const BAZA = 32; // px/s stałego dryfu w lewo
+
+	let tick: ((time: number, deltaMs: number) => void) | null = null;
+	let onResize: (() => void) | null = null;
+
+	function stop() {
+		if (tick) gsap.ticker.remove(tick);
+		tick = null;
+		if (onResize) window.removeEventListener("resize", onResize);
+		onResize = null;
+	}
+
+	function init() {
+		stop();
+		const track = document.getElementById("marquee-track");
+		const kopia = track?.querySelector<HTMLElement>(".kopia");
+		if (!track || !kopia || reduceMotion()) return;
+
+		let copyW = 0;
+
+		// dokłada kopie, aż pętla domyka się nawet na najszerszym ekranie
+		const dopelnij = () => {
+			copyW = kopia.offsetWidth;
+			while (copyW > 0 && track.scrollWidth < window.innerWidth + copyW * 2) {
+				track.appendChild(kopia.cloneNode(true));
+			}
+		};
+		dopelnij();
+		onResize = dopelnij;
+		window.addEventListener("resize", onResize);
+
+		let pos = 0;
+		let lastY = window.scrollY;
+		let ema = 0;
+
+		tick = (_time, deltaMs) => {
+			const dt = Math.min(deltaMs / 1000, 0.1);
+			const dy = Math.max(-90, Math.min(90, window.scrollY - lastY));
+			lastY = window.scrollY;
+			ema += (dy - ema) * 0.12;
+			pos -= BAZA * dt + ema * 0.45;
+			if (copyW > 0) {
+				pos %= copyW;
+				if (pos > 0) pos -= copyW;
+			}
+			track.style.transform = `translate3d(${pos}px, 0, 0)`;
+		};
+		gsap.ticker.add(tick);
+	}
+
+	document.addEventListener("astro:page-load", init);
+	document.addEventListener("astro:before-swap", stop);
+</script>

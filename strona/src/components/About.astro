@@ -1,0 +1,77 @@
+---
+const tagi = ["Python", "FastAPI", "JavaScript/TypeScript", "Astro", "htmx", "PostgreSQL", "Docker", "AI-assisted dev"];
+
+// ASCII-diagram (dekoracja, aria-hidden) — trend "Technical Mono";
+// budowany w frontmatterze, żeby wcięcia szablonu nie trafiły do <pre>.
+// Celowo czysty ASCII (+-|) zamiast znaków ramkowych Unicode — cienkie ─
+// łamią się na ClearType/fallbackach fontów przy małym rozmiarze
+const diagram = `+---------+     +----------------+     +-----------+
+|  excel  | --> |   <span class="text-accent">automate()</span>   | --> | aplikacja |
++---------+     +----------------+     +-----------+`;
+---
+
+<section id="o-mnie" data-sekcja="o-mnie" class="relative px-[6vw] py-24 md:py-32 border-t border-line">
+	<p class="cmd-line text-accent text-[13px] before:content-['$_'] before:opacity-70">
+		<span data-cmd>cat o-mnie.md</span>
+	</p>
+
+	<div id="o-mnie-content" class="mt-7 max-w-[68ch] flex flex-col gap-6">
+		<p class="text-[15px] md:text-[16.5px] leading-[1.75] text-ink/90">
+			Obecnie samodzielnie rozwijam własny CRM dla usług związanych z AI Act. Wcześniej, pracując we
+			wsparciu IT, z własnej inicjatywy zbudowałem <b class="text-ink font-semibold">Planer</b> — aplikację,
+			którą doprowadziłem od problemu do wdrożenia dla blisko 100-osobowej firmy. Pracuję z użyciem
+			<b class="text-accent font-semibold">AI-assisted development</b>: analizuję ręczny proces, projektuję
+			rozwiązanie i weryfikuję efekt w kodzie oraz testach.
+		</p>
+
+		<div class="flex flex-wrap gap-2">
+			{
+				tagi.map((t) => (
+					<span
+						data-hover-scramble
+						class="rounded-[3px] border border-line px-2.5 py-1 text-[11.5px] uppercase tracking-wide text-muted"
+					>
+						{t}
+					</span>
+				))
+			}
+		</div>
+
+		<pre
+			class="text-[10px] md:text-[12px] leading-[1.4] text-muted select-none overflow-x-auto"
+			aria-hidden="true"
+			set:html={diagram}
+		/>
+	</div>
+</section>
+
+<script>
+	import gsap from "gsap";
+	import { ScrollTrigger } from "gsap/ScrollTrigger";
+	import { reduceMotion, typeCommand } from "../scripts/efekty";
+
+	gsap.registerPlugin(ScrollTrigger);
+
+	function init() {
+		const sekcja = document.getElementById("o-mnie");
+		if (!sekcja || reduceMotion()) return;
+
+		const cmd = sekcja.querySelector("[data-cmd]");
+		const tresc = sekcja.querySelectorAll("#o-mnie-content > *");
+
+		gsap.set(tresc, { opacity: 0, y: 16 });
+
+		ScrollTrigger.create({
+			trigger: sekcja,
+			start: "top 75%",
+			once: true,
+			onEnter: () => {
+				(cmd ? typeCommand(cmd) : Promise.resolve()).then(() => {
+					gsap.to(tresc, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out", stagger: 0.11 });
+				});
+			},
+		});
+	}
+
+	document.addEventListener("astro:page-load", init);
+</script>

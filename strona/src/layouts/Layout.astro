@@ -1,0 +1,165 @@
+---
+import { ClientRouter } from "astro:transitions";
+import Terminal from "../components/Terminal.astro";
+import "../styles/global.css";
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<html lang="pl">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<ClientRouter />
+	</head>
+	<body class="bg-bg text-ink font-mono antialiased">
+		<slot />
+
+		<div class="crt-overlay" aria-hidden="true" transition:persist="crt"></div>
+
+		<div aria-hidden="true" transition:persist="pasek-scrolla">
+			<div class="fixed top-0 right-0 z-50 h-full w-[3px] bg-line/40">
+				<div id="scroll-bar" class="h-full w-full origin-top bg-accent" style="transform: scaleY(0)"></div>
+			</div>
+			<p
+				id="scroll-readout"
+				class="fixed bottom-4 right-4 z-50 hidden md:block text-[11px] tracking-widest text-muted [font-variant-numeric:tabular-nums]"
+			>
+				scroll: 00% · start
+			</p>
+			<p
+				id="kursor-info"
+				class="fixed top-0 left-0 z-50 hidden md:block pointer-events-none opacity-0 text-[10px] tracking-widest text-muted/70 [font-variant-numeric:tabular-nums] transition-opacity"
+			>
+			</p>
+		</div>
+
+		<Terminal />
+
+		<script>
+			import Lenis from "lenis";
+			import gsap from "gsap";
+			import { ScrollTrigger } from "gsap/ScrollTrigger";
+			import { reduceMotion, scramble } from "../scripts/efekty";
+
+			gsap.registerPlugin(ScrollTrigger);
+
+			// wizytówka dla devów zaglądających do konsoli (raz na pełne załadowanie)
+			console.log(
+				`%c
+     ██╗ █████╗ ██╗  ██╗██╗   ██╗██████╗
+     ██║██╔══██╗██║ ██╔╝██║   ██║██╔══██╗
+     ██║███████║█████╔╝ ██║   ██║██████╔╝
+██   ██║██╔══██║██╔═██╗ ██║   ██║██╔══██╗
+╚█████╔╝██║  ██║██║  ██╗╚██████╔╝██████╔╝
+ ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝`,
+				"color:#f0a63d",
+			);
+			console.log(
+				"%cZaglądasz pod maskę? Dobra reakcja. Na stronie działa prawdziwy terminal —\nkliknij [>_] w lewym dolnym rogu (albo wciśnij `) i wpisz 'help'.",
+				"color:#838c7c",
+			);
+
+			// mikrointerakcja: scramble na hover dla oznaczonych elementów
+			// (delegacja na dokumencie — przeżywa podmiany DOM przy nawigacji SPA)
+			document.addEventListener("mouseover", (e) => {
+				const cel =
+					e.target instanceof Element
+						? e.target.closest<HTMLElement>("[data-hover-scramble]")
+						: null;
+				if (!cel || cel.dataset.busy) return;
+				cel.dataset.busy = "1";
+				scramble(cel, 380).then(() => delete cel.dataset.busy);
+			});
+
+			// kursor systemowy: odczyt współrzędnych przy wskaźniku (tylko desktop
+			// z precyzyjnym wskaźnikiem; przy reduced-motion wyłączony)
+			const kursorInfo = document.getElementById("kursor-info");
+			if (kursorInfo && window.matchMedia("(pointer: fine)").matches && !reduceMotion()) {
+				let kx = 0;
+				let ky = 0;
+				let zaplanowane = 0;
+				const rysuj = () => {
+					zaplanowane = 0;
+					kursorInfo.style.transform = `translate3d(${kx + 16}px, ${ky + 22}px, 0)`;
+					kursorInfo.textContent = `x:${kx} y:${ky}`;
+				};
+				window.addEventListener(
+					"pointermove",
+					(e) => {
+						kx = Math.round(e.clientX);
+						ky = Math.round(e.clientY);
+						kursorInfo.style.opacity = "1";
+						if (!zaplanowane) zaplanowane = requestAnimationFrame(rysuj);
+					},
+					{ passive: true },
+				);
+				document.documentElement.addEventListener("mouseleave", () => {
+					kursorInfo.style.opacity = "0";
+				});
+			}
+
+			let lenis: Lenis | null = null;
+
+			function raf(time: number) {
+				lenis?.raf(time);
+				requestAnimationFrame(raf);
+			}
+			requestAnimationFrame(raf);
+
+			let sekcje: HTMLElement[] = [];
+
+			function updateScrollUI() {
+				const bar = document.getElementById("scroll-bar");
+				const readout = document.getElementById("scroll-readout");
+				const max = document.documentElement.scrollHeight - window.innerHeight;
+				const p = max > 0 ? Math.min(Math.max(window.scrollY / max, 0), 1) : 0;
+				if (bar) bar.style.transform = `scaleY(${p})`;
+
+				let nazwa = sekcje[0]?.dataset.sekcja ?? "start";
+				for (const s of sekcje) {
+					if (s.getBoundingClientRect().top <= window.innerHeight * 0.4) {
+						nazwa = s.dataset.sekcja ?? nazwa;
+					}
+				}
+				if (readout) {
+					readout.textContent = `scroll: ${String(Math.round(p * 100)).padStart(2, "0")}% · ${nazwa}`;
+				}
+			}
+
+			window.addEventListener("scroll", updateScrollUI, { passive: true });
+			window.addEventListener("resize", updateScrollUI, { passive: true });
+
+			document.addEventListener("astro:page-load", () => {
+				lenis?.destroy();
+				lenis = reduceMotion() ? null : new Lenis({ duration: 1.1, smoothWheel: true });
+				sekcje = Array.from(document.querySelectorAll<HTMLElement>("[data-sekcja]"));
+				updateScrollUI();
+			});
+
+			// ScrollTriggery starej strony nie mogą przeżyć podmiany DOM
+			document.addEventListener("astro:before-swap", () => {
+				ScrollTrigger.getAll().forEach((t) => t.kill());
+			});
+
+			// otwarty terminal blokuje scroll strony: Lenis pauzuje, żeby nie
+			// akumulował delty z kółka/touchpada nad tłem modala
+			document.addEventListener("terminal:toggle", (e) => {
+				if ((e as CustomEvent).detail?.otwarty) {
+					lenis?.stop();
+				} else {
+					lenis?.start();
+				}
+			});
+		</script>
+	</body>
+</html>

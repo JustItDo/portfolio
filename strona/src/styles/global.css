@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0c0b;
+  --color-ink: #e7e4d8;
+  --color-accent: #f0a63d;
+  --color-accent-ink: #1a1200;
+  --color-line: #23261f;
+  --color-muted: #838c7c;
+
+  --font-mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas, "Liberation Mono", ui-monospace, monospace;
+}
+
+html {
+  color-scheme: dark;
+  /* natywny scrollbar schowany — zastępuje go linia postępu z Layout.astro */
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+/* linie komend ($ cat …) — stała wysokość, żeby typewriter nie ruszał layoutu */
+.cmd-line {
+  min-height: 1lh;
+}
+
+/* nakładka CRT: statyczne scanlines + rzadki, ledwie widoczny flicker jasności.
+   Skoki opacity są małe i rzadkie (2 mrugnięcia / 9 s) — daleko od progów
+   fotosensytywnych; przy reduced-motion animacja gaśnie, scanlines zostają. */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.15) 0 1px, transparent 1px 3px);
+  opacity: 0.5;
+  animation: crt-flicker 9s steps(1, end) infinite;
+}
+
+@keyframes crt-flicker {
+  0%, 6.9%, 8.3%, 53.9%, 55.1%, 100% { opacity: 0.5; }
+  7% { opacity: 0.74; }
+  7.6% { opacity: 0.4; }
+  54.2% { opacity: 0.68; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

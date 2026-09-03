@@ -1,0 +1,297 @@
+---
+// Interaktywny mini-terminal (trend: gamifikacja portfolio). Otwierany
+// przyciskiem [>_] albo klawiszem ` — odwiedzający może "obsłużyć" stronę
+// komendami. Lista projektów idzie z kolekcji (jedno źródło prawdy),
+// serializowana przez data-atrybut, bo skrypt modułowy nie widzi frontmattera.
+import { getCollection } from "astro:content";
+
+const projekty = (await getCollection("case-studies"))
+	.sort((a, b) => a.data.order - b.data.order)
+	.map((e) => ({ slug: e.id, opis: e.data.summary }));
+---
+
+<div id="terminal-root" data-projekty={JSON.stringify(projekty)} transition:persist="terminal">
+	<button
+		id="terminal-fab"
+		aria-haspopup="dialog"
+		class="fixed bottom-4 left-4 z-40 hidden md:flex items-center gap-2 rounded-[3px] border border-line bg-bg/80 px-2.5 py-1.5 text-[11px] tracking-widest text-muted transition-[color,border-color,transform] hover:text-accent hover:border-accent active:scale-[0.95]"
+	>
+		<span class="text-accent">&gt;_</span> terminal
+	</button>
+
+	<div
+		id="terminal-okno"
+		role="dialog"
+		aria-modal="true"
+		aria-label="Interaktywny terminal portfolio"
+		class="fixed inset-0 z-[55] hidden items-center justify-center bg-bg/60 backdrop-blur-[2px]"
+	>
+		<div class="mx-4 w-full max-w-[640px] overflow-hidden rounded-[3px] border border-line bg-bg shadow-[0_0_40px_rgb(0_0_0/0.6)]">
+			<div class="flex items-center justify-between border-b border-line px-3 py-2 text-[11px] tracking-widest text-muted">
+				<span>jakub@portfolio:~</span>
+				<button id="terminal-zamknij" aria-label="Zamknij terminal" class="hover:text-accent">[x]</button>
+			</div>
+			<div
+				id="terminal-out"
+				role="log"
+				aria-live="polite"
+				data-lenis-prevent
+				class="h-[300px] overflow-y-auto px-3 py-2 text-[12.5px] leading-relaxed"
+			>
+			</div>
+			<form id="terminal-form" class="flex items-center gap-2 border-t border-line px-3 py-2.5">
+				<span class="text-accent" aria-hidden="true">$</span>
+				<input
+					id="terminal-in"
+					class="flex-1 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-muted/50"
+					autocomplete="off"
+					autocapitalize="off"
+					spellcheck="false"
+					aria-label="Wpisz komendę"
+					placeholder="help"
+				/>
+			</form>
+		</div>
+	</div>
+</div>
+
+<style>
+	#terminal-out {
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-line) transparent;
+	}
+</style>
+
+<script>
+	import { navigate } from "astro:transitions/client";
+
+	const root = document.getElementById("terminal-root");
+	const okno = document.getElementById("terminal-okno");
+	const out = document.getElementById("terminal-out");
+	const pole = document.getElementById("terminal-in") as HTMLInputElement | null;
+	const form = document.getElementById("terminal-form");
+	const fab = document.getElementById("terminal-fab");
+	const zamknijBtn = document.getElementById("terminal-zamknij");
+
+	const projekty: { slug: string; opis: string }[] = JSON.parse(root?.dataset.projekty ?? "[]");
+	let powitany = false;
+
+	// kreator wiadomości (koncept W02): komenda 'kontakt' przełącza terminal
+	// w tryb konwersacyjny — 3 pytania, podsumowanie, [T/n], POST /api/contact
+	const PYTANIA = [
+		{ q: "[1/3] jak masz na imię?", k: "name" },
+		{ q: "[2/3] na jaki e-mail mam odpisać?", k: "email" },
+		{ q: "[3/3] co mogę dla Ciebie zautomatyzować? (opisz swoimi słowami)", k: "message" },
+	];
+	let kreator: { krok: number; dane: Record<string, string> } | null = null;
+
+	function print(tekst = "", klasa = "text-ink/85") {
+		if (!out) return;
+		const linia = document.createElement("div");
+		linia.className = `whitespace-pre-wrap ${klasa}`;
+		linia.textContent = tekst;
+		out.appendChild(linia);
+		out.scrollTop = out.scrollHeight;
+	}
+
+	// modal blokuje scroll strony pod spodem — Layout łapie ten event
+	// i zatrzymuje/wznawia Lenisa (scroll wewnątrz #terminal-out jest natywny
+	// dzięki data-lenis-prevent)
+	function oglosStan(otwarty: boolean) {
+		document.documentElement.style.overflow = otwarty ? "hidden" : "";
+		document.dispatchEvent(new CustomEvent("terminal:toggle", { detail: { otwarty } }));
+	}
+
+	function otworz() {
+		if (!okno) return;
+		okno.classList.remove("hidden");
+		okno.classList.add("flex");
+		oglosStan(true);
+		if (!powitany) {
+			powitany = true;
+			print("portfolio-shell v1.0 — wpisz 'help'. Zamykanie: 'exit' albo Esc.", "text-muted");
+		}
+		pole?.focus();
+	}
+
+	function zamknij() {
+		okno?.classList.add("hidden");
+		okno?.classList.remove("flex");
+		oglosStan(false);
+		fab?.focus();
+	}
+
+	function skroc(t: string, max = 64) {
+		return t.length > max ? t.slice(0, max - 1).trimEnd() + "…" : t;
+	}
+
+	async function wyslijWiadomosc(dane: Record<string, string>) {
+		print("wysyłanie…", "text-muted");
+		try {
+			const res = await fetch("/api/contact", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ ...dane, website: "" }),
+			});
+			const wynik = await res.json().catch(() => ({}));
+			if (res.ok && wynik.ok) {
+				print("✔ wysłane — odpowiem najszybciej jak mogę", "text-accent");
+			} else {
+				print(`✗ ${wynik.blad ?? "wysyłka nie powiodła się"}`, "text-muted");
+				print("napisz bezpośrednio: diaxodiax@gmail.com (albo formularz w sekcji kontakt)");
+			}
+		} catch {
+			print("✗ brak połączenia — napisz bezpośrednio: diaxodiax@gmail.com", "text-muted");
+		}
+	}
+
+	function obsluzKreator(v: string) {
+		if (!kreator) return;
+		print("> " + v, "text-accent");
+
+		if (v.toLowerCase() === "anuluj") {
+			print("anulowano — wracasz do zwykłych komend.", "text-muted");
+			kreator = null;
+			return;
+		}
+
+		if (kreator.krok < PYTANIA.length) {
+			const p = PYTANIA[kreator.krok];
+			if (p.k === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+				print("hmm, to nie wygląda jak e-mail — spróbuj jeszcze raz", "text-muted");
+				return;
+			}
+			kreator.dane[p.k] = v;
+			kreator.krok++;
+			if (kreator.krok < PYTANIA.length) {
+				print(PYTANIA[kreator.krok].q);
+			} else {
+				print("— podsumowanie —", "text-muted");
+				print(`  imię:      ${kreator.dane.name}`);
+				print(`  e-mail:    ${kreator.dane.email}`);
+				print(`  wiadomość: ${skroc(kreator.dane.message, 120)}`);
+				print(
+					"rodo: dane wykorzystam tylko do odpowiedzi; wysyłkę realizuje Resend (USA) — pełna klauzula: komenda 'rodo' albo sekcja kontakt.",
+					"text-muted",
+				);
+				print("wysłać? [T/n]");
+			}
+			return;
+		}
+
+		// potwierdzenie [T/n]
+		if (/^(t|tak)$/i.test(v)) {
+			const dane = kreator.dane;
+			kreator = null;
+			wyslijWiadomosc(dane);
+		} else if (/^(n|nie)$/i.test(v)) {
+			print("anulowano — nic nie wysłałem.", "text-muted");
+			kreator = null;
+		} else {
+			print("wpisz T (wyślij) albo n (anuluj)", "text-muted");
+		}
+	}
+
+	function wykonaj(surowe: string) {
+		const cmd = surowe.trim();
+		if (!cmd) return;
+		if (kreator) {
+			obsluzKreator(cmd);
+			return;
+		}
+		print(`$ ${cmd}`, "text-accent");
+		const c = cmd.toLowerCase();
+		const projekt = projekty.find((p) => p.slug === c || c === `otworz ${p.slug}`);
+
+		if (c === "help" || c === "?") {
+			print(
+				[
+					"dostępne komendy:",
+					"  projekty          lista projektów",
+					...projekty.map((p) => `  ${p.slug.padEnd(18)}otwórz case study`),
+					"  o-mnie            kim jestem",
+					"  stack             technologie",
+					"  kontakt           kreator wiadomości (3 pytania)",
+					"  rodo              pełna klauzula informacyjna",
+					"  whoami            kim jesteś ty",
+					"  clear · exit",
+				].join("\n"),
+			);
+		} else if (c === "projekty" || c === "ls" || c === "ls projekty" || c === "ls -la projekty/") {
+			projekty.forEach((p) => print(`  ${p.slug.padEnd(10)}${skroc(p.opis)}`));
+			print("wpisz nazwę projektu, żeby otworzyć case study.", "text-muted");
+		} else if (projekt) {
+			print(`otwieram /case-studies/${projekt.slug} …`, "text-muted");
+			zamknij();
+			navigate(`/case-studies/${projekt.slug}`);
+		} else if (c === "o-mnie" || c === "cat o-mnie.md" || c === "o mnie") {
+			print(
+				"Jakub — samodzielnie rozwijam CRM dla usług związanych z AI Act.\n" +
+					"Wcześniej we wsparciu IT zbudowałem i wdrożyłem Planer, który\n" +
+					"zastąpił ręczną pracę rozproszoną między Excelem, papierem\n" +
+					"i starymi narzędziami.",
+			);
+		} else if (c === "stack") {
+			print("python · fastapi · javascript/typescript · astro · htmx · sql · android · ai-assisted dev");
+		} else if (c === "rodo") {
+			print(
+				"Dane z formularza (imię, e-mail, treść) wykorzystuję wyłącznie do odpowiedzi na\n" +
+					"Twoje zapytanie — podstawa: mój prawnie uzasadniony interes (art. 6 ust. 1 lit. f\n" +
+					"RODO). Wysyłkę realizuje usługa Resend (USA), która tymczasowo przetwarza treść\n" +
+					"wiadomości w celu jej doręczenia; poza tym trafia ona tylko do mojej skrzynki\n" +
+					"e-mail. Wiadomość przechowuję do zakończenia korespondencji, potem usuwam —\n" +
+					"możesz też o to poprosić w dowolnym momencie. Masz prawo dostępu, sprostowania,\n" +
+					"usunięcia danych i skargi do Prezesa UODO. Administrator danych: Jakub [nazwisko],\n" +
+					"kontakt: diaxodiax@gmail.com. Serwer zapisuje standardowe logi dostępu (w tym IP)\n" +
+					"w celach bezpieczeństwa.",
+			);
+		} else if (c === "kontakt" || c === "napisz" || c === "mail") {
+			print("kreator wiadomości — 3 pytania i gotowe ('anuluj' przerywa).", "text-muted");
+			kreator = { krok: 0, dane: {} };
+			print(PYTANIA[0].q);
+		} else if (c === "whoami") {
+			print("gość — a jeśli rekrutujesz: dobrze trafiłeś/aś.");
+		} else if (c.startsWith("sudo")) {
+			print("[sudo] hasło dla gość: **********", "text-muted");
+			if (c.includes("zatrudnij-jakuba")) {
+				print("gość nie widnieje w pliku sudoers…", "text-muted");
+				print("…ale dla tej komendy robię wyjątek:");
+				print("✔ zatrudnij-jakuba: dostęp przyznany → '> napisz_do_mnie()'", "text-accent");
+			} else {
+				print("gość nie widnieje w pliku sudoers. Incydent zostanie zgłoszony.", "text-muted");
+				print("(podpowiedź: jest jedna komenda sudo, która przechodzi)", "text-muted");
+			}
+		} else if (c === "clear") {
+			if (out) out.innerHTML = "";
+		} else if (c === "exit") {
+			zamknij();
+		} else {
+			print(`portfolio-shell: ${cmd}: nie znaleziono komendy — wpisz 'help'`, "text-muted");
+		}
+	}
+
+	fab?.addEventListener("click", otworz);
+	zamknijBtn?.addEventListener("click", zamknij);
+	okno?.addEventListener("click", (e) => {
+		if (e.target === okno) zamknij();
+	});
+	form?.addEventListener("submit", (e) => {
+		e.preventDefault();
+		if (!pole) return;
+		wykonaj(pole.value);
+		pole.value = "";
+	});
+
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape" && okno && !okno.classList.contains("hidden")) {
+			zamknij();
+			return;
+		}
+		const t = e.target as HTMLElement | null;
+		const wPolu = !!t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+		if ((e.key === "`" || e.key === "~") && !wPolu) {
+			e.preventDefault();
+			otworz();
+		}
+	});
+</script>

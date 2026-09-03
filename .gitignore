@@ -1,0 +1,19 @@
+# Sekrety / lokalna konfiguracja
+.env
+.env.local
+
+# Lokalne pliki narzędzi i instrukcji agentów
+.claude/
+.agents/
+.codex/
+CLAUDE.md
+AGENTS.md
+
+# System / edytor
+.DS_Store
+Thumbs.db
+
+# Astro (strona/) — build/dependency, nie commitujemy
+strona/node_modules/
+strona/dist/
+strona/.astro/

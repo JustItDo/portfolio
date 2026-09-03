@@ -1,0 +1,227 @@
+---
+// Sekcja kontaktu — koncept W03 "compose": formularz jako pisanie maila
+// w terminalowym kliencie poczty (nagłówki Do/Od/Temat, margines ~ jak w vimie,
+// pasek skrótów). Wysyłka: POST /api/contact (Resend), fallback mailto.
+const MAILTO = "diaxodiax@gmail.com";
+---
+
+<section id="kontakt" data-sekcja="kontakt" class="relative px-[6vw] py-24 md:py-32 border-t border-line">
+	<p class="cmd-line text-accent text-[13px] before:content-['$_'] before:opacity-70">
+		<span data-cmd>mail jakub@portfolio --compose</span>
+	</p>
+
+	<div id="kontakt-content" class="mt-7 flex flex-col gap-6 max-w-[640px]">
+		<p class="text-[14px] leading-[1.7] text-ink/85 max-w-[58ch]">
+			Masz w firmie proces, który zjada czas? Opisz go — powiem, czy da się to
+			zautomatyzować i od czego bym zaczął.
+		</p>
+
+		<form id="kontakt-form" class="overflow-hidden rounded-[3px] border border-line bg-bg" novalidate>
+			<div
+				class="flex items-center justify-between border-b border-line px-3.5 py-2 text-[11px] tracking-widest text-muted"
+			>
+				<span>mail — nowa-wiadomosc.eml</span>
+				<span id="kontakt-mod">[+] zmodyfikowany</span>
+			</div>
+
+			<div class="flex flex-col gap-1.5 border-b border-line px-3.5 py-3">
+				<div class="flex items-baseline gap-2.5 text-[13px]">
+					<span class="w-[7ch] flex-none text-muted">Do:</span>
+					<span class="text-ink/80">Jakub &lt;{MAILTO}&gt;</span>
+				</div>
+				<div class="flex items-baseline gap-2.5 text-[13px]">
+					<label for="kontakt-imie" class="w-[7ch] flex-none text-muted">Od:</label>
+					<input
+						id="kontakt-imie"
+						name="name"
+						required
+						maxlength="100"
+						placeholder="Twoje imię"
+						autocomplete="name"
+						class="flex-1 border-b border-dashed border-transparent bg-transparent text-[13px] text-ink caret-accent outline-none placeholder:text-muted/50 focus:border-line"
+					/>
+				</div>
+				<div class="flex items-baseline gap-2.5 text-[13px]">
+					<label for="kontakt-email" class="w-[7ch] flex-none text-muted">E-mail:</label>
+					<input
+						id="kontakt-email"
+						name="email"
+						type="email"
+						required
+						maxlength="200"
+						placeholder="gdzie mam odpisać?"
+						autocomplete="email"
+						class="flex-1 border-b border-dashed border-transparent bg-transparent text-[13px] text-ink caret-accent outline-none placeholder:text-muted/50 focus:border-line"
+					/>
+				</div>
+				<div class="flex items-baseline gap-2.5 text-[13px]">
+					<label for="kontakt-temat" class="w-[7ch] flex-none text-muted">Temat:</label>
+					<input
+						id="kontakt-temat"
+						name="subject"
+						maxlength="150"
+						placeholder="np. automatyzacja grafiku pracy (opcjonalny)"
+						class="flex-1 border-b border-dashed border-transparent bg-transparent text-[13px] text-ink caret-accent outline-none placeholder:text-muted/50 focus:border-line"
+					/>
+				</div>
+				<!-- honeypot: ludzie go nie widzą, boty wypełniają -->
+				<div class="hidden" aria-hidden="true">
+					<label for="kontakt-www">Strona WWW</label>
+					<input id="kontakt-www" name="website" tabindex="-1" autocomplete="off" />
+				</div>
+			</div>
+
+			<div class="flex">
+				<div
+					class="select-none px-2.5 py-3 text-right text-[13px] leading-[1.7] text-line"
+					aria-hidden="true"
+				>
+					~<br />~<br />~<br />~<br />~<br />~<br />~
+				</div>
+				<textarea
+					id="kontakt-tresc"
+					name="message"
+					required
+					maxlength="5000"
+					data-lenis-prevent
+					placeholder="Napisz, co dziś w Twojej firmie robi się ręcznie…"
+					aria-label="Treść wiadomości"
+					class="min-h-[180px] flex-1 resize-y bg-transparent py-3 pr-3 pl-1 text-[13.5px] leading-[1.7] text-ink caret-accent outline-none placeholder:text-muted/50"
+				></textarea>
+			</div>
+
+			<p class="px-3.5 pb-1 text-[11px] leading-[1.65] text-muted max-w-[66ch] before:content-['#_'] before:text-line">
+				RODO: dane z formularza (imię, e-mail, treść) wykorzystuję wyłącznie do odpowiedzi
+				na Twoje zapytanie — podstawa: mój prawnie uzasadniony interes (art. 6 ust. 1 lit. f
+				RODO). Wysyłkę realizuje usługa Resend (USA), która tymczasowo przetwarza treść
+				wiadomości w celu jej doręczenia; poza tym trafia ona tylko do mojej skrzynki
+				e-mail. Wiadomość przechowuję do zakończenia korespondencji, potem usuwam —
+				możesz też o to poprosić w dowolnym momencie. Masz prawo dostępu, sprostowania,
+				usunięcia danych i skargi do Prezesa UODO. Administrator danych: Jakub [nazwisko],
+				kontakt: {MAILTO}. Serwer zapisuje standardowe logi dostępu (w tym IP) w celach
+				bezpieczeństwa.
+			</p>
+
+			<div class="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line px-3.5 py-2.5 text-[11.5px] text-muted">
+				<button
+					type="submit"
+					class="cursor-pointer transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
+				>
+					<b class="rounded-[2px] bg-accent px-1.5 font-semibold text-accent-ink">^S</b> wyślij
+				</button>
+				<button
+					type="reset"
+					class="cursor-pointer transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
+				>
+					<b class="rounded-[2px] bg-accent px-1.5 font-semibold text-accent-ink">^X</b> wyczyść
+				</button>
+				<span id="kontakt-status" role="status" aria-live="polite"></span>
+			</div>
+		</form>
+	</div>
+</section>
+
+<script>
+	import gsap from "gsap";
+	import { ScrollTrigger } from "gsap/ScrollTrigger";
+	import { reduceMotion, typeCommand } from "../scripts/efekty";
+
+	gsap.registerPlugin(ScrollTrigger);
+
+	const MAILTO = "diaxodiax@gmail.com";
+
+	function initFormularz(form: HTMLFormElement) {
+		const status = form.querySelector<HTMLElement>("#kontakt-status");
+		const mod = form.querySelector<HTMLElement>("#kontakt-mod");
+
+		const ustawStatus = (html: string, akcent = false) => {
+			if (!status) return;
+			status.innerHTML = html;
+			status.classList.toggle("text-accent", akcent);
+		};
+
+		form.addEventListener("input", () => {
+			if (mod) mod.textContent = "[+] zmodyfikowany";
+		});
+
+		// Ctrl+S w obrębie formularza = wyślij (zamiast zapisu strony)
+		form.addEventListener("keydown", (e) => {
+			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+				e.preventDefault();
+				form.requestSubmit();
+			}
+		});
+
+		form.addEventListener("reset", () => {
+			ustawStatus("");
+			if (mod) mod.textContent = "[ ] pusty";
+		});
+
+		form.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			const dane = Object.fromEntries(new FormData(form).entries());
+
+			if (!String(dane.name ?? "").trim() || !String(dane.message ?? "").trim()) {
+				ustawStatus("błąd: wypełnij pola Od i treść wiadomości");
+				return;
+			}
+			if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(dane.email ?? ""))) {
+				ustawStatus("błąd: podaj poprawny adres e-mail");
+				return;
+			}
+
+			ustawStatus("wysyłanie…");
+			try {
+				const res = await fetch("/api/contact", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(dane),
+				});
+				const wynik = await res.json().catch(() => ({}));
+				if (res.ok && wynik.ok) {
+					form.reset(); // najpierw reset (jego handler czyści status)…
+					ustawStatus("✔ wysłane — odpowiem najszybciej jak mogę", true);
+					if (mod) mod.textContent = "[✔] wysłano";
+				} else if (res.status === 400 || res.status === 429) {
+					ustawStatus(`błąd: ${wynik.blad ?? "sprawdź formularz"}`);
+				} else {
+					ustawStatus(
+						`✗ nie wyszło — napisz bezpośrednio: <a class="text-accent underline underline-offset-2" href="mailto:${MAILTO}">${MAILTO}</a>`,
+					);
+				}
+			} catch {
+				ustawStatus(
+					`✗ brak połączenia — napisz bezpośrednio: <a class="text-accent underline underline-offset-2" href="mailto:${MAILTO}">${MAILTO}</a>`,
+				);
+			}
+		});
+	}
+
+	function init() {
+		const sekcja = document.getElementById("kontakt");
+		if (!sekcja) return;
+
+		const form = sekcja.querySelector<HTMLFormElement>("#kontakt-form");
+		if (form) initFormularz(form);
+
+		if (reduceMotion()) return;
+
+		const cmd = sekcja.querySelector("[data-cmd]");
+		const tresc = sekcja.querySelectorAll("#kontakt-content > *");
+
+		gsap.set(tresc, { opacity: 0, y: 16 });
+
+		ScrollTrigger.create({
+			trigger: sekcja,
+			start: "top 75%",
+			once: true,
+			onEnter: () => {
+				(cmd ? typeCommand(cmd) : Promise.resolve()).then(() => {
+					gsap.to(tresc, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out", stagger: 0.11 });
+				});
+			},
+		});
+	}
+
+	document.addEventListener("astro:page-load", init);
+</script>
