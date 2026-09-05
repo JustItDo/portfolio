@@ -1,12 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-    <rect width="128" height="128" rx="20" fill="#0a0c0b" />
-    <text
-        x="64"
-        y="84"
-        text-anchor="middle"
-        font-family="ui-monospace, 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace"
-        font-size="60"
-        font-weight="700"
-        fill="#f0a63d"
-    >&gt;_</text>
+    <!-- Znak marki „Podmiana": litera l z justdo(l)t — to samo „l", które podmienia
+         „I" w „just do IT". Geometria: siatka 128, pole żywe 82×82, kreska 16.
+         W kaflu favikony znak jest przeskalowany 1,12× wokół środka, żeby zostawić
+         14% marginesu zamiast 18% — sama ścieżka to nieruszona konstrukcja. -->
+    <rect width="128" height="128" rx="12" fill="#0a0c0b" />
+    <g
+        transform="translate(64.5 64) scale(1.12) translate(-64.5 -64)"
+        fill="none"
+        stroke="#f0a63d"
+        stroke-width="16"
+    >
+        <path d="M57 23 V82 Q57 97 72 97 H94" />
+        <path d="M57 31 H35" />
+    </g>
 </svg>
