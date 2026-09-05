@@ -9,8 +9,6 @@ const projektyCount = (await getCollection("case-studies")).length;
 	data-sekcja="start"
 	class="relative min-h-screen overflow-hidden px-[6vw] py-24 flex flex-col justify-center"
 >
-	<div class="grid-overlay" aria-hidden="true"></div>
-
 	<div class="absolute top-6 left-[6vw] right-[6vw] flex justify-between text-[11px] tracking-widest uppercase text-muted">
 		<span>Jakub — Portfolio</span>
 		<span>Automatyzacja procesów</span>
@@ -55,17 +53,6 @@ const projektyCount = (await getCollection("case-studies")).length;
 </section>
 
 <style>
-	.grid-overlay {
-		position: absolute;
-		inset: -10% 0 0 0;
-		pointer-events: none;
-		background-image:
-			repeating-linear-gradient(to right, var(--color-line) 0 1px, transparent 1px 64px),
-			repeating-linear-gradient(to bottom, var(--color-line) 0 1px, transparent 1px 64px);
-		-webkit-mask-image: radial-gradient(ellipse at 22% 15%, #000 35%, transparent 78%);
-		mask-image: radial-gradient(ellipse at 22% 15%, #000 35%, transparent 78%);
-	}
-
 	.cursor {
 		display: inline-block;
 		width: 0.5em;
@@ -169,15 +156,10 @@ const projektyCount = (await getCollection("case-studies")).length;
 			}, 2400);
 		});
 
-		// parallax przy zjeździe: treść odjeżdża wolniej niż scroll, siatka szybciej
+		// parallax przy zjeździe: treść odjeżdża wolniej niż scroll
 		gsap.to("#hero-content", {
 			yPercent: -14,
 			opacity: 0.15,
-			ease: "none",
-			scrollTrigger: { trigger: sekcja, start: "top top", end: "bottom top", scrub: true },
-		});
-		gsap.to(".grid-overlay", {
-			yPercent: 10,
 			ease: "none",
 			scrollTrigger: { trigger: sekcja, start: "top top", end: "bottom top", scrub: true },
 		});
