@@ -28,6 +28,12 @@ justdolt.pl {
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
 
+	# Pliki w _astro/ mają hash treści w nazwie (np. gsap.Bi_c5vh2.js) — nowa
+	# wersja pliku to zawsze nowa nazwa, więc rok cache jest bezpieczny
+	# (Lighthouse: "Używaj efektywnego czasu przechowywania w pamięci podręcznej").
+	@immutable path /_astro/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
 	@api path /api/*
 	handle @api {
 		# Limit rozmiaru body — formularz kontaktowy nie potrzebuje więcej.

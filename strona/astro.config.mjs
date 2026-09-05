@@ -19,6 +19,12 @@ export default defineConfig({
     bodySizeLimit: 64 * 1024,
   }),
   integrations: [sitemap()],
+  build: {
+    // domyślny próg 4kB zostawiał Layout.css (~5.6 KiB) jako osobny,
+    // renderowanie-blokujący request — 'always' wkleja cały CSS strony
+    // wprost do HTML (Lighthouse: "Prośby o zablokowanie renderowania")
+    inlineStylesheets: 'always',
+  },
   security: {
     // BEZ tego Astro ignoruje X-Forwarded-For zza Caddy i clientAddress w
     // src/pages/api/contact.ts zawsze wychodzi jako 127.0.0.1 (adres Caddy) —
