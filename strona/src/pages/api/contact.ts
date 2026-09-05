@@ -7,7 +7,7 @@ export const prerender = false;
 // tylko jako mail w skrzynce odbiorcy. Warunki wdrożeniowe (Node przypięty do
 // 127.0.0.1, Caddy: X-Forwarded-For + max_size body) — wiki/06, sekcja deploy.
 
-const ODBIORCA = "diaxodiax@gmail.com";
+const ODBIORCA = "kontakt@justdolt.pl";
 const LIMITY = { name: 100, email: 200, subject: 150, message: 5000 };
 // przecinek wykluczony także w domenie — "a@b.com,evil.com" nie przejdzie
 const EMAIL_RE = /^[^\s@,]+@[^\s@,]+\.[^\s@,]+$/;

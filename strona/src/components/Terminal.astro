@@ -142,10 +142,10 @@ const projekty = (await getCollection("case-studies"))
 				print("✔ wysłane — odpowiem najszybciej jak mogę", "text-accent");
 			} else {
 				print(`✗ ${wynik.blad ?? "wysyłka nie powiodła się"}`, "text-muted");
-				print("napisz bezpośrednio: diaxodiax@gmail.com (albo formularz w sekcji kontakt)");
+				print("napisz bezpośrednio: kontakt@justdolt.pl (albo formularz w sekcji kontakt)");
 			}
 		} catch {
-			print("✗ brak połączenia — napisz bezpośrednio: diaxodiax@gmail.com", "text-muted");
+			print("✗ brak połączenia — napisz bezpośrednio: kontakt@justdolt.pl", "text-muted");
 		}
 	}
 
@@ -248,7 +248,7 @@ const projekty = (await getCollection("case-studies"))
 					"skrzynki e-mail. Wiadomość przechowuję do zakończenia korespondencji, potem usuwam —\n" +
 					"możesz też o to poprosić w dowolnym momencie. Masz prawo dostępu, sprostowania,\n" +
 					"usunięcia danych i skargi do Prezesa UODO. Administrator danych: Jakub Turski,\n" +
-					"kontakt: diaxodiax@gmail.com. Serwer zapisuje standardowe logi dostępu (w tym IP)\n" +
+					"kontakt: kontakt@justdolt.pl. Serwer zapisuje standardowe logi dostępu (w tym IP)\n" +
 					"w celach bezpieczeństwa.",
 			);
 		} else if (c === "kontakt" || c === "napisz" || c === "mail") {
