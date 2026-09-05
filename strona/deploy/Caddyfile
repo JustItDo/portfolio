@@ -1,0 +1,68 @@
+# Caddyfile — Portfolio (Jakub)
+#
+# Instalacja na serwerze: skopiuj do /etc/caddy/Caddyfile (albo dołącz przez
+# `import`), podmień domenę na twoja-domena.pl na docelową (DuckDNS albo
+# zakupioną na home.pl/nazwa.pl — patrz wiki/06-decyzje-techniczne.md),
+# potem `systemctl reload caddy`.
+#
+# Zasada: Caddy serwuje statykę bezpośrednio z dysku; jedyny ruch, który
+# trafia do procesu Node (systemd: portfolio.service, patrz portfolio.service
+# w tym katalogu), to /api/*. Crash Node psuje tylko formularz kontaktowy —
+# reszta strony (to, co widzi rekruter) dalej działa.
+
+twoja-domena.pl {
+	root * /var/www/portfolio/dist/client
+	encode gzip
+
+	# Nagłówki bezpieczeństwa — strona bez ciasteczek/logowania, więc niski
+	# wpływ, ale trzy linie kosztem zera (audytor-bezpieczenstwa, 2026-09-05).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+
+	@api path /api/*
+	handle @api {
+		# Limit rozmiaru body — formularz kontaktowy nie potrzebuje więcej.
+		# Druga warstwa: bodySizeLimit w astro.config.mjs (adapter node).
+		request_body {
+			max_size 64KB
+		}
+
+		# NIE USUWAĆ te dwie linie — bez nich src/pages/api/contact.ts widzi
+		# każdego odwiedzającego jako 127.0.0.1 (adres Caddy) i rate-limit
+		# per-IP staje się globalny (patrz security.allowedDomains w
+		# astro.config.mjs; audytor-bezpieczenstwa, 2026-09-05).
+		#
+		# X-Forwarded-Host: Astro odrzuca WSZYSTKIE forwarded-nagłówki
+		# (łącznie z X-Forwarded-For), dopóki host nie przejdzie walidacji
+		# przeciw security.allowedDomains — bez tej linii nie ma czego
+		# walidować.
+		header_up X-Forwarded-Host {http.request.host}
+		# X-Forwarded-For: NADPISZ realnym IP klienta zamiast dopisywać do
+		# wartości przysłanej w requeście (bez `+` z przodu = ustawienie,
+		# nie dopisanie) — inaczej rate-limit per-IP jest trywialny do
+		# ominięcia dowolnym X-Forwarded-For w żądaniu.
+		header_up X-Forwarded-For {http.request.remote.host}
+
+		# Node (portfolio.service) nasłuchuje WYŁĄCZNIE na 127.0.0.1:4321 —
+		# nigdy nie wystawiaj tego portu bezpośrednio do internetu.
+		reverse_proxy 127.0.0.1:4321
+	}
+
+	handle {
+		try_files {path} =404
+		file_server
+	}
+
+	# Logi zawierają IP odwiedzających (dana osobowa) — retencja 90 dni,
+	# nie przechowywać bezterminowo.
+	log {
+		output file /var/log/caddy/portfolio.log {
+			roll_size 50MiB
+			roll_keep 20
+			roll_keep_for 2160h
+		}
+	}
+}

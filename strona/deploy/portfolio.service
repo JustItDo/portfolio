@@ -1,0 +1,62 @@
+# systemd unit — Portfolio (proces Node, @astrojs/node standalone)
+#
+# Instalacja na serwerze:
+#   1. cp portfolio.service /etc/systemd/system/portfolio.service
+#   2. useradd --system --no-create-home --shell /usr/sbin/nologin portfolio
+#   3. mkdir -p /etc/portfolio && chmod 700 /etc/portfolio
+#      echo "RESEND_API_KEY=..." > /etc/portfolio/portfolio.env
+#      chmod 600 /etc/portfolio/portfolio.env
+#      chown portfolio:portfolio /etc/portfolio/portfolio.env
+#   4. chown -R portfolio:portfolio /var/www/portfolio
+#   5. systemctl daemon-reload && systemctl enable --now portfolio
+#
+# Restart po deployu: systemctl restart portfolio (bramka Kierownika w
+# .claude/hooks/przed-deployem.sh wymaga GO od straznik-jakosci przed tą komendą).
+
+[Unit]
+Description=Portfolio — serwer Node (Astro @astrojs/node, endpoint /api/contact)
+After=network.target
+
+[Service]
+Type=simple
+User=portfolio
+Group=portfolio
+WorkingDirectory=/var/www/portfolio
+# UWAGA — pułapka systemd: wartości z EnvironmentFile= NADPISUJĄ Environment=
+# niezależnie od kolejności linii w tym pliku. /etc/portfolio/portfolio.env
+# ma zawierać WYŁĄCZNIE RESEND_API_KEY — dopisanie tam kiedyś "HOST=..." po
+# cichu przestawi bind procesu i zdejmie ochronę 127.0.0.1 poniżej, bez
+# żadnego błędu czy logu. Po każdym deployu potwierdź: `ss -ltnp | grep 4321`
+# musi pokazać 127.0.0.1:4321, nigdy *:4321 (audytor-bezpieczenstwa, 2026-09-05).
+EnvironmentFile=/etc/portfolio/portfolio.env
+Environment=HOST=127.0.0.1
+Environment=PORT=4321
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node ./dist/server/entry.mjs
+Restart=on-failure
+RestartSec=5
+
+# HOST=127.0.0.1 jest tu krytyczny: proces nie może nasłuchiwać na 0.0.0.0
+# wystawione bezpośrednio do internetu, inaczej rate-limit per-IP w kodzie
+# endpointu jest do ominięcia z pominięciem Caddy.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+UMask=0077
+# free-tier VM ma mało pamięci — wyciek w Node nie może ściągnąć OOM-killera
+# na Caddy i całą resztę strony.
+MemoryMax=512M
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target
