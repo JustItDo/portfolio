@@ -1,23 +1,29 @@
 # Caddyfile — Portfolio (Jakub)
 #
 # Instalacja na serwerze: skopiuj do /etc/caddy/Caddyfile (albo dołącz przez
-# `import`), podmień domenę na twoja-domena.pl na docelową (DuckDNS albo
-# zakupioną na home.pl/nazwa.pl — patrz wiki/06-decyzje-techniczne.md),
-# potem `systemctl reload caddy`.
+# `import`), potem `systemctl reload caddy`.
 #
 # Zasada: Caddy serwuje statykę bezpośrednio z dysku; jedyny ruch, który
 # trafia do procesu Node (systemd: portfolio.service, patrz portfolio.service
 # w tym katalogu), to /api/*. Crash Node psuje tylko formularz kontaktowy —
 # reszta strony (to, co widzi rekruter) dalej działa.
 
-twoja-domena.pl {
+www.justdolt.pl {
+	redir https://justdolt.pl{uri} permanent
+}
+
+justdolt.pl {
 	root * /var/www/portfolio/dist/client
 	encode gzip
 
 	# Nagłówki bezpieczeństwa — strona bez ciasteczek/logowania, więc niski
 	# wpływ, ale trzy linie kosztem zera (audytor-bezpieczenstwa, 2026-09-05).
+	# HSTS max-age celowo niski na start (300s) — podnieść do roku dopiero po
+	# potwierdzeniu, że HTTPS i przekierowanie www działają stabilnie
+	# (straznik-jakosci, 2026-09-05): błąd certu/www zapamiętany na rok w
+	# przeglądarce byłby trudny do cofnięcia.
 	header {
-		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Strict-Transport-Security "max-age=300; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
@@ -35,24 +41,28 @@ twoja-domena.pl {
 		# per-IP staje się globalny (patrz security.allowedDomains w
 		# astro.config.mjs; audytor-bezpieczenstwa, 2026-09-05).
 		#
-		# X-Forwarded-Host: Astro odrzuca WSZYSTKIE forwarded-nagłówki
-		# (łącznie z X-Forwarded-For), dopóki host nie przejdzie walidacji
-		# przeciw security.allowedDomains — bez tej linii nie ma czego
-		# walidować.
-		header_up X-Forwarded-Host {http.request.host}
-		# X-Forwarded-For: NADPISZ realnym IP klienta zamiast dopisywać do
-		# wartości przysłanej w requeście (bez `+` z przodu = ustawienie,
-		# nie dopisanie) — inaczej rate-limit per-IP jest trywialny do
-		# ominięcia dowolnym X-Forwarded-For w żądaniu.
-		header_up X-Forwarded-For {http.request.remote.host}
-
 		# Node (portfolio.service) nasłuchuje WYŁĄCZNIE na 127.0.0.1:4321 —
 		# nigdy nie wystawiaj tego portu bezpośrednio do internetu.
-		reverse_proxy 127.0.0.1:4321
+		reverse_proxy 127.0.0.1:4321 {
+			# X-Forwarded-Host: Astro odrzuca WSZYSTKIE forwarded-nagłówki
+			# (łącznie z X-Forwarded-For), dopóki host nie przejdzie walidacji
+			# przeciw security.allowedDomains — bez tej linii nie ma czego
+			# walidować.
+			header_up X-Forwarded-Host {http.request.host}
+			# X-Forwarded-For: NADPISZ realnym IP klienta zamiast dopisywać do
+			# wartości przysłanej w requeście (bez `+` z przodu = ustawienie,
+			# nie dopisanie) — inaczej rate-limit per-IP jest trywialny do
+			# ominięcia dowolnym X-Forwarded-For w żądaniu.
+			header_up X-Forwarded-For {http.request.remote.host}
+		}
 	}
 
 	handle {
-		try_files {path} =404
+		# bez try_files — file_server sam serwuje index.html dla katalogów
+		# i zwraca 404 dla brakujących plików. try_files {path} =404 (usunięte)
+		# dopasowywał WYŁĄCZNIE dokładną ścieżkę żądania jako plik, więc "/"
+		# i "/case-studies/planer" (katalogi, nie pliki) zawsze dawały 404 —
+		# znalezione przy pierwszym realnym teście przez Caddy, 2026-09-05.
 		file_server
 	}
 

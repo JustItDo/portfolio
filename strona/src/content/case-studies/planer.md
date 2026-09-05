@@ -34,6 +34,15 @@ Planer łączy najważniejsze procesy pracownicze w jednym miejscu:
 - dokumenty i poradniki pracownicze
 - widoki dopasowane do ról oraz urządzeń mobilnych i terminali magazynowych
 
+## Przed i po
+
+Wniosek urlopowy wcześniej krążył papierowo lub mailowo. W Planerze pracownik
+składa go elektronicznie, a przełożony akceptuje go w aplikacji.
+
+Godziny do wypłat wcześniej rozliczano ręcznie w Excelu. Planer łączy rejestrację
+czasu pracy z raportami XLSX do rozliczeń — dane o czasie i raport powstają
+w jednym systemie.
+
 ## Najważniejsze decyzje
 
 - Interfejs jest renderowany po stronie serwera, a biblioteki frontendowe są

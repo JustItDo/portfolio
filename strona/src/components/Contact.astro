@@ -16,7 +16,11 @@ const MAILTO = "diaxodiax@gmail.com";
 			zautomatyzować i od czego bym zaczął.
 		</p>
 
-		<form id="kontakt-form" class="overflow-hidden rounded-[3px] border border-line bg-bg" novalidate>
+		<p class="text-[14px] text-ink/85">Możesz też napisać bezpośrednio: <a class="text-accent underline underline-offset-4" href={`mailto:${MAILTO}`}>{MAILTO}</a>.</p>
+		<noscript><p>Formularz wymaga JavaScriptu. Skorzystaj z adresu e-mail powyżej.</p></noscript>
+		<form id="kontakt-form" method="post" action="/api/contact" class="overflow-hidden rounded-[3px] border border-line bg-bg" novalidate>
+			<fieldset disabled class="min-w-0 border-0 p-0 m-0">
+			<legend class="sr-only">Wiadomość do Jakuba</legend>
 			<div
 				class="flex items-center justify-between border-b border-line px-3.5 py-2 text-[11px] tracking-widest text-muted"
 			>
@@ -94,8 +98,10 @@ const MAILTO = "diaxodiax@gmail.com";
 				RODO: dane z formularza (imię, e-mail, treść) wykorzystuję wyłącznie do odpowiedzi
 				na Twoje zapytanie — podstawa: mój prawnie uzasadniony interes (art. 6 ust. 1 lit. f
 				RODO). Wysyłkę realizuje usługa Resend (USA), która tymczasowo przetwarza treść
-				wiadomości w celu jej doręczenia; poza tym trafia ona tylko do mojej skrzynki
-				e-mail. Wiadomość przechowuję do zakończenia korespondencji, potem usuwam —
+				wiadomości w celu jej doręczenia, na podstawie mojej akceptacji ich umowy
+				powierzenia przetwarzania danych opartej o certyfikację EU-US Data Privacy
+				Framework oraz standardowe klauzule umowne; poza tym trafia ona tylko do mojej
+				skrzynki e-mail. Wiadomość przechowuję do zakończenia korespondencji, potem usuwam —
 				możesz też o to poprosić w dowolnym momencie. Masz prawo dostępu, sprostowania,
 				usunięcia danych i skargi do Prezesa UODO. Administrator danych: Jakub Turski,
 				kontakt: {MAILTO}. Serwer zapisuje standardowe logi dostępu (w tym IP) w celach
@@ -107,7 +113,7 @@ const MAILTO = "diaxodiax@gmail.com";
 					type="submit"
 					class="cursor-pointer transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
 				>
-					<b class="rounded-[2px] bg-accent px-1.5 font-semibold text-accent-ink">^S</b> wyślij
+					<span class="inline-block rounded-[3px] bg-accent px-4 py-2 text-[13px] font-semibold text-accent-ink">Wyślij wiadomość</span>
 				</button>
 				<button
 					type="reset"
@@ -115,8 +121,9 @@ const MAILTO = "diaxodiax@gmail.com";
 				>
 					<b class="rounded-[2px] bg-accent px-1.5 font-semibold text-accent-ink">^X</b> wyczyść
 				</button>
-				<span id="kontakt-status" role="status" aria-live="polite"></span>
 			</div>
+			</fieldset>
+			<p id="kontakt-status" class="px-3.5 py-2 text-[13px] text-muted" role="status" aria-live="polite"></p>
 		</form>
 	</div>
 </section>
@@ -129,14 +136,26 @@ const MAILTO = "diaxodiax@gmail.com";
 	gsap.registerPlugin(ScrollTrigger);
 
 	const MAILTO = "diaxodiax@gmail.com";
+	const aktywneFormularze = new WeakSet<HTMLFormElement>();
 
 	function initFormularz(form: HTMLFormElement) {
+		if (aktywneFormularze.has(form)) return;
+		aktywneFormularze.add(form);
 		const status = form.querySelector<HTMLElement>("#kontakt-status");
 		const mod = form.querySelector<HTMLElement>("#kontakt-mod");
+		const pola = form.querySelector<HTMLFieldSetElement>("fieldset");
+		let wysylanie = false;
 
-		const ustawStatus = (html: string, akcent = false) => {
+		const ustawStatus = (tekst: string, akcent = false, linkDoMaila = false) => {
 			if (!status) return;
-			status.innerHTML = html;
+			status.textContent = tekst;
+			if (linkDoMaila) {
+				const link = document.createElement("a");
+				link.href = `mailto:${MAILTO}`;
+				link.textContent = MAILTO;
+				link.className = "text-accent underline underline-offset-2";
+				status.append(" ", link);
+			}
 			status.classList.toggle("text-accent", akcent);
 		};
 
@@ -159,6 +178,7 @@ const MAILTO = "diaxodiax@gmail.com";
 
 		form.addEventListener("submit", async (e) => {
 			e.preventDefault();
+			if (wysylanie) return;
 			const dane = Object.fromEntries(new FormData(form).entries());
 
 			if (!String(dane.name ?? "").trim() || !String(dane.message ?? "").trim()) {
@@ -171,6 +191,9 @@ const MAILTO = "diaxodiax@gmail.com";
 			}
 
 			ustawStatus("wysyłanie…");
+			wysylanie = true;
+			if (pola) pola.disabled = true;
+			form.setAttribute("aria-busy", "true");
 			try {
 				const res = await fetch("/api/contact", {
 					method: "POST",
@@ -186,15 +209,20 @@ const MAILTO = "diaxodiax@gmail.com";
 					ustawStatus(`błąd: ${wynik.blad ?? "sprawdź formularz"}`);
 				} else {
 					ustawStatus(
-						`✗ nie wyszło — napisz bezpośrednio: <a class="text-accent underline underline-offset-2" href="mailto:${MAILTO}">${MAILTO}</a>`,
+						"✗ nie wyszło — napisz bezpośrednio:", false, true,
 					);
 				}
 			} catch {
 				ustawStatus(
-					`✗ brak połączenia — napisz bezpośrednio: <a class="text-accent underline underline-offset-2" href="mailto:${MAILTO}">${MAILTO}</a>`,
+					"✗ brak połączenia — napisz bezpośrednio:", false, true,
 				);
+			} finally {
+				wysylanie = false;
+				if (pola) pola.disabled = false;
+				form.removeAttribute("aria-busy");
 			}
 		});
+		if (pola) pola.disabled = false;
 	}
 
 	function init() {
@@ -207,21 +235,22 @@ const MAILTO = "diaxodiax@gmail.com";
 		if (reduceMotion()) return;
 
 		const cmd = sekcja.querySelector("[data-cmd]");
-		const tresc = sekcja.querySelectorAll("#kontakt-content > *");
-
-		gsap.set(tresc, { opacity: 0, y: 16 });
 
 		ScrollTrigger.create({
 			trigger: sekcja,
 			start: "top 75%",
 			once: true,
 			onEnter: () => {
-				(cmd ? typeCommand(cmd) : Promise.resolve()).then(() => {
-					gsap.to(tresc, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out", stagger: 0.11 });
-				});
+				if (cmd) typeCommand(cmd);
 			},
 		});
 	}
 
 	document.addEventListener("astro:page-load", init);
 </script>
+
+<style>
+	input, textarea { min-width: 0; }
+	input:focus-visible, textarea:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+	fieldset:disabled { opacity: 0.65; }
+</style>

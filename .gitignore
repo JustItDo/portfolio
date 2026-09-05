@@ -17,3 +17,6 @@ Thumbs.db
 strona/node_modules/
 strona/dist/
 strona/.astro/
+
+# Dane SSH do VM
+ssh/*

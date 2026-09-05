@@ -5,9 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 import tailwindcss from '@tailwindcss/vite';
 
-// TODO: podmienić na docelową domenę (DuckDNS albo domena kupiona na
-// home.pl/nazwa.pl), gdy zostanie wybrana — patrz wiki/06-decyzje-techniczne.md
-const SITE_URL = 'https://twoja-domena.pl';
+const SITE_URL = 'https://justdolt.pl';
 
 // https://astro.build/config
 export default defineConfig({

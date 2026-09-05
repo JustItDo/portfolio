@@ -75,6 +75,7 @@ const projekty = (await getCollection("case-studies"))
 
 	const projekty: { slug: string; opis: string }[] = JSON.parse(root?.dataset.projekty ?? "[]");
 	let powitany = false;
+	let poprzedniFocus: HTMLElement | null = null;
 
 	// kreator wiadomości (koncept W02): komenda 'kontakt' przełącza terminal
 	// w tryb konwersacyjny — 3 pytania, podsumowanie, [T/n], POST /api/contact
@@ -104,6 +105,8 @@ const projekty = (await getCollection("case-studies"))
 
 	function otworz() {
 		if (!okno) return;
+		if (!okno.classList.contains("hidden")) return;
+		poprzedniFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		okno.classList.remove("hidden");
 		okno.classList.add("flex");
 		oglosStan(true);
@@ -118,7 +121,8 @@ const projekty = (await getCollection("case-studies"))
 		okno?.classList.add("hidden");
 		okno?.classList.remove("flex");
 		oglosStan(false);
-		fab?.focus();
+		if (poprzedniFocus?.isConnected) poprzedniFocus.focus();
+		else fab?.focus();
 	}
 
 	function skroc(t: string, max = 64) {
@@ -238,8 +242,10 @@ const projekty = (await getCollection("case-studies"))
 				"Dane z formularza (imię, e-mail, treść) wykorzystuję wyłącznie do odpowiedzi na\n" +
 					"Twoje zapytanie — podstawa: mój prawnie uzasadniony interes (art. 6 ust. 1 lit. f\n" +
 					"RODO). Wysyłkę realizuje usługa Resend (USA), która tymczasowo przetwarza treść\n" +
-					"wiadomości w celu jej doręczenia; poza tym trafia ona tylko do mojej skrzynki\n" +
-					"e-mail. Wiadomość przechowuję do zakończenia korespondencji, potem usuwam —\n" +
+					"wiadomości w celu jej doręczenia, na podstawie mojej akceptacji ich umowy\n" +
+					"powierzenia przetwarzania danych opartej o certyfikację EU-US Data Privacy\n" +
+					"Framework oraz standardowe klauzule umowne; poza tym trafia ona tylko do mojej\n" +
+					"skrzynki e-mail. Wiadomość przechowuję do zakończenia korespondencji, potem usuwam —\n" +
 					"możesz też o to poprosić w dowolnym momencie. Masz prawo dostępu, sprostowania,\n" +
 					"usunięcia danych i skargi do Prezesa UODO. Administrator danych: Jakub Turski,\n" +
 					"kontakt: diaxodiax@gmail.com. Serwer zapisuje standardowe logi dostępu (w tym IP)\n" +
@@ -283,6 +289,16 @@ const projekty = (await getCollection("case-studies"))
 	});
 
 	document.addEventListener("keydown", (e) => {
+		if (e.key === "Tab" && okno && !okno.classList.contains("hidden")) {
+			const dostepne = Array.from(okno.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), a[href], [tabindex="0"]'));
+			const pierwszy = dostepne[0];
+			const ostatni = dostepne.at(-1);
+			if (e.shiftKey && (document.activeElement === pierwszy || !okno.contains(document.activeElement))) {
+				e.preventDefault(); ostatni?.focus();
+			} else if (!e.shiftKey && (document.activeElement === ostatni || !okno.contains(document.activeElement))) {
+				e.preventDefault(); pierwszy?.focus();
+			}
+		}
 		if (e.key === "Escape" && okno && !okno.classList.contains("hidden")) {
 			zamknij();
 			return;

@@ -19,23 +19,19 @@ const projektyCount = (await getCollection("case-studies")).length;
 			<span data-cmd>automate --input=reczna-robota --output=aplikacja</span>
 		</p>
 
-		<h1 class="text-[clamp(26px,3.6vw,44px)] leading-[1.28] font-medium max-w-[16ch]" style="text-wrap: balance;">
-			<span data-scramble>Buduję aplikacje, które automatyzują pracę robioną dziś ręcznie</span>
-			<!-- blok: myślnik + żywa końcówka zawsze zaczynają własną linię,
-			     niezależnie od długości frazy w cyklu -->
-			<span class="block">— <span data-cykl>w Excelu, na papierze, w głowie.</span><span class="cursor" aria-hidden="true"></span></span>
+		<h1 class="text-[clamp(26px,3.6vw,44px)] leading-[1.28] font-medium max-w-[24ch]" style="text-wrap: balance;">
+			Zamieniam ręczne procesy w aplikacje<span class="cursor" aria-hidden="true"></span>
 		</h1>
+		<p class="max-w-[58ch] text-[15px] leading-[1.75] text-ink/85">Grafiki w Excelu, papierowe wnioski, zadania trzymane w głowie. Buduję narzędzia, które zbierają tę pracę w jednym miejscu.</p>
 
 		<p
-			data-hero-reveal
 			class="flex gap-7 flex-wrap text-[12.5px] text-muted tracking-wide [font-variant-numeric:tabular-nums]"
 		>
-			PROJEKTY&nbsp;<b id="stat-projects" class="text-accent font-semibold" data-count-to={projektyCount}>0</b>
-			&nbsp;·&nbsp; SKALA&nbsp;<b id="stat-users" class="text-accent font-semibold" data-count-to="100" data-prefix="~">0</b>
-			&nbsp;·&nbsp; STATUS&nbsp;<b class="text-accent font-semibold"><i class="led" aria-hidden="true"></i>W BUDOWIE</b>
+			<span>PROJEKTY <b class="text-accent font-semibold">{projektyCount}</b></span>
+			<span>Planer: wdrożenie dla <b class="text-accent font-semibold">~100 pracowników</b></span>
 		</p>
 
-		<div data-hero-reveal class="flex gap-3.5 flex-wrap">
+		<div class="flex gap-3.5 flex-wrap">
 			<a
 				href="#kontakt"
 				class="rounded-[3px] px-[18px] py-3 text-[13px] border border-accent bg-accent text-accent-ink font-semibold transition-transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
@@ -69,102 +65,14 @@ const projektyCount = (await getCollection("case-studies")).length;
 		}
 	}
 
-	/* dioda statusu — kwadratowa (terminal), mruga skokowo jak kursor */
-	.led {
-		display: inline-block;
-		width: 7px;
-		height: 7px;
-		margin-right: 7px;
-		background: var(--color-accent);
-		box-shadow: 0 0 6px var(--color-accent);
-		animation: led-puls 1.4s steps(1) infinite;
-	}
-
-	@keyframes led-puls {
-		50% {
-			opacity: 0.35;
-		}
-	}
 </style>
 
 <script>
-	import gsap from "gsap";
-	import { ScrollTrigger } from "gsap/ScrollTrigger";
-	import { reduceMotion, scramble, typeCommand } from "../scripts/efekty";
-
-	gsap.registerPlugin(ScrollTrigger);
-
-	function countUp(el: Element) {
-		const target = parseInt(el.getAttribute("data-count-to") || "0", 10);
-		const prefix = el.getAttribute("data-prefix") || "";
-		const suffix = el.getAttribute("data-suffix") || "";
-		const counter = { val: 0 };
-		gsap.to(counter, {
-			val: target,
-			duration: reduceMotion() ? 0 : 0.9,
-			ease: "power3.out",
-			onUpdate: () => {
-				el.textContent = prefix + Math.round(counter.val) + suffix;
-			},
-		});
-	}
-
-	// żywa końcówka H1: po dekodzie pełne wyliczenie podmienia się cyklicznie
-	// na pojedyncze frazy; przy reduced-motion zostaje pełne zdanie ze źródła
-	const FRAZY = ["w Excelu.", "na papierze.", "w głowie."];
-	let cyklTimer: ReturnType<typeof setInterval> | undefined;
-	let cyklOpozniacz: ReturnType<typeof setTimeout> | undefined;
-
-	function stopCykl() {
-		clearInterval(cyklTimer);
-		clearTimeout(cyklOpozniacz);
-	}
+	import { reduceMotion, typeCommand } from "../scripts/efekty";
 
 	function init() {
-		const sekcja = document.getElementById("hero");
-		if (!sekcja) return;
-
-		stopCykl();
-		document.querySelectorAll("[data-count-to]").forEach(countUp);
-
-		if (reduceMotion()) return;
-
-		// sekwencja startowa: komenda wpisuje się, H1 dekoduje, reszta wjeżdża
-		const cmd = sekcja.querySelector("[data-cmd]");
-		const naglowek = sekcja.querySelector("[data-scramble]");
-		const cykl = sekcja.querySelector("[data-cykl]");
-		const reszta = sekcja.querySelectorAll("[data-hero-reveal]");
-
-		gsap.set(reszta, { opacity: 0, y: 16 });
-		if (cmd) typeCommand(cmd, 16);
-		const dekodowanie = Promise.all(
-			[naglowek, cykl].filter((c): c is Element => !!c).map((c) => scramble(c, 1100)),
-		);
-		dekodowanie.then(() => {
-			gsap.to(reszta, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", stagger: 0.12 });
-
-			if (!cykl) return;
-			let i = -1;
-			const nastepna = () => {
-				i = (i + 1) % FRAZY.length;
-				cykl.textContent = FRAZY[i];
-				scramble(cykl, 550);
-			};
-			cyklOpozniacz = setTimeout(() => {
-				nastepna();
-				cyklTimer = setInterval(nastepna, 3600);
-			}, 2400);
-		});
-
-		// parallax przy zjeździe: treść odjeżdża wolniej niż scroll
-		gsap.to("#hero-content", {
-			yPercent: -14,
-			opacity: 0.15,
-			ease: "none",
-			scrollTrigger: { trigger: sekcja, start: "top top", end: "bottom top", scrub: true },
-		});
+		const cmd = document.querySelector("#hero [data-cmd]");
+		if (cmd && !reduceMotion()) typeCommand(cmd, 16);
 	}
-
 	document.addEventListener("astro:page-load", init);
-	document.addEventListener("astro:before-swap", stopCykl);
 </script>

@@ -32,6 +32,15 @@ merytoryczną.
 - formularz audytu AI oraz generator raportu dla klienta
 - tryb PWA dla settera, przygotowany do pracy przy niestabilnym połączeniu
 
+## Jak przebiega praca w CRM
+
+Lead z formularza Meta trafia do CRM, gdzie system sprawdza źródło i duplikaty
+oraz zachowuje dowód zgody. Zespół prowadzi kolejne kroki w kanbanie i kolejce
+codziennej pracy: kontakt, audyt, ofertę i dalsze zadania. Formularz audytu
+pozwala przygotować raport dla klienta.
+
+Pełny start operacyjny jest jeszcze przed zespołem.
+
 ## Najważniejsze decyzje
 
 - CRM i przyszła platforma kursowa mają osobne schematy oraz role PostgreSQL.
