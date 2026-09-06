@@ -7,6 +7,19 @@ stack: ["Python 3.14", "FastAPI", "Jinja2", "htmx", "PostgreSQL 18", "Docker", "
 status: "wdrożony · rozwój trwa"
 codeVisibility: "private"
 codeNote: "Repozytorium pozostaje prywatne, ponieważ zawiera model procesu sprzedaży i zabezpieczenia danych leadów. Na rozmowie mogę omówić architekturę, sposób testowania i wybrane decyzje techniczne bez ujawniania danych biznesowych."
+screenshots:
+  - src: "/screenshots/crm-ai-act/kolejka-pracy.webp"
+    alt: "Dzienny rejestr pracy: kolejka zadań posegregowana według pilności (SLA, zaległe, dzisiejsze)"
+  - src: "/screenshots/crm-ai-act/nowy-lead-zgoda.webp"
+    alt: "Formularz nowego leada: kanał pozyskania, zakres zgody i wymagany dowód zgody"
+  - src: "/screenshots/crm-ai-act/rejestr-sprzeciwow.webp"
+    alt: "Rejestr blokad kontaktu: zgłoszenie sprzeciwu wobec marketingu poza rozmową (art. 21)"
+  - src: "/screenshots/crm-ai-act/raport-audytu.webp"
+    alt: "Wygenerowany raport z audytu zgodności z AI Act, gotowy do zapisu jako PDF"
+  - src: "/screenshots/crm-ai-act/karta-deala-zadania.webp"
+    alt: "Karta szansy sprzedaży: zadania, wartość oferty i historia zmian etapów"
+  - src: "/screenshots/crm-ai-act/widok-settera-mobile.webp"
+    alt: "Mobilny widok settera: lista dzisiejszych rozmów i szybkie oznaczenie wyniku"
 ---
 
 ## Problem
