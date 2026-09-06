@@ -7,6 +7,19 @@ stack: ["FastAPI", "Jinja2", "htmx", "Alpine.js", "PostgreSQL", "SQLAlchemy"]
 status: "wdrożony · 08.2026"
 codeVisibility: "private"
 codeNote: "Repozytorium jest prywatne, ponieważ aplikacja została zbudowana dla wewnętrznych procesów firmy. Na rozmowie mogę omówić architekturę, decyzje techniczne i bezpieczne fragmenty implementacji."
+screenshots:
+  - src: "/screenshots/planer/grafik-pracownika.webp"
+    alt: "Widok pracownika: własny grafik miesięczny, tylko do odczytu"
+  - src: "/screenshots/planer/grafik-kierownika.webp"
+    alt: "Widok kierownika: siatka miesięczna grafiku całego zespołu z edycją pojedynczego dnia"
+  - src: "/screenshots/planer/panel-zarzadzania.webp"
+    alt: "Panel zarządzania: obłożenie stanowisk, oczekujące wnioski i szybkie akcje"
+  - src: "/screenshots/planer/wnioski-urlopowe.webp"
+    alt: "Kolejka wniosków urlopowych oczekujących na akceptację przełożonego"
+  - src: "/screenshots/planer/rcp-zegar.webp"
+    alt: "Rejestracja czasu pracy: zegar startu, przerwy i osi dnia"
+  - src: "/screenshots/planer/raport-czasu-pracy.webp"
+    alt: "Raport czasu pracy zespołu z eksportem do XLSX i ostrzeżeniem o przekroczonym limicie przerwy"
 ---
 
 ## Problem
