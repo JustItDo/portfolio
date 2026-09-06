@@ -1,0 +1,59 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const MAILTO = "kontakt@justdolt.pl";
+---
+
+<Layout
+	title="Polityka prywatności — Jakub"
+	description="Jak przetwarzam dane z formularza kontaktowego: podstawa prawna, odbiorcy danych, retencja i Twoje prawa."
+>
+	<article
+		data-sekcja="polityka-prywatnosci"
+		class="relative px-[6vw] py-24 md:py-32 max-w-[70ch] mx-auto flex flex-col gap-8"
+	>
+		<a href="/#kontakt" class="text-[13px] text-muted hover:text-accent transition-colors w-fit">
+			&larr; wróć do kontaktu
+		</a>
+
+		<header class="flex flex-col gap-3">
+			<p class="cmd-line text-accent text-[13px] before:content-['$_'] before:opacity-70">
+				<span data-cmd>cat polityka-prywatnosci.md</span>
+			</p>
+			<h1 class="text-[clamp(28px,4vw,42px)] font-semibold text-ink">Polityka prywatności</h1>
+			<p class="text-[13px] text-muted">Dotyczy wyłącznie danych podanych w formularzu kontaktowym na tej stronie.</p>
+		</header>
+
+		<div class="flex flex-col gap-4 border-t border-line pt-8 text-[14px] leading-[1.75] text-ink/85">
+			<p>
+				Administratorem Twoich danych jest Jakub Turski, kontakt: <a href={`mailto:${MAILTO}`} class="text-accent hover:underline">{MAILTO}</a>.
+			</p>
+			<p>
+				Dane z formularza kontaktowego (imię, e-mail, temat wiadomości — opcjonalnie, treść
+				wiadomości) wykorzystuję wyłącznie w celu
+				odpowiedzi na Twoje zapytanie — podstawą przetwarzania jest mój prawnie uzasadniony interes
+				(art. 6 ust. 1 lit. f RODO).
+			</p>
+			<p>
+				Wysyłkę wiadomości realizuje usługa Resend (USA), która tymczasowo przetwarza jej treść w celu
+				doręczenia, na podstawie umowy powierzenia przetwarzania danych opartej o certyfikację EU-US
+				Data Privacy Framework oraz standardowe klauzule umowne.
+			</p>
+			<p>
+				Wiadomość trafia na adres {MAILTO}, obsługiwany przez usługę przekierowania poczty ImprovMX, a
+				stamtąd do mojej prywatnej skrzynki e-mail — obie usługi przetwarzają wiadomość wyłącznie w
+				celu jej doręczenia.
+			</p>
+			<p>
+				Dane przechowuję do zakończenia korespondencji, po czym je usuwam — możesz też poprosić o ich
+				usunięcie wcześniej.
+			</p>
+			<p>
+				Masz prawo dostępu do swoich danych, ich sprostowania, usunięcia, ograniczenia przetwarzania,
+				wniesienia sprzeciwu wobec przetwarzania, a także wniesienia skargi do Prezesa Urzędu Ochrony
+				Danych Osobowych (UODO).
+			</p>
+			<p>Serwer zapisuje również standardowe logi dostępu (w tym adres IP) w celach bezpieczeństwa.</p>
+		</div>
+	</article>
+</Layout>

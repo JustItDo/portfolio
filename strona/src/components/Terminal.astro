@@ -175,7 +175,7 @@ const projekty = (await getCollection("case-studies"))
 				print(`  e-mail:    ${kreator.dane.email}`);
 				print(`  wiadomość: ${skroc(kreator.dane.message, 120)}`);
 				print(
-					"rodo: dane wykorzystam tylko do odpowiedzi; wysyłkę realizuje Resend (USA) — pełna klauzula: komenda 'rodo' albo sekcja kontakt.",
+					"rodo: dane wykorzystam tylko do odpowiedzi; wysyłkę realizuje Resend (USA) — pełna klauzula: komenda 'rodo' albo /polityka-prywatnosci.",
 					"text-muted",
 				);
 				print("wysłać? [T/n]");
@@ -239,7 +239,7 @@ const projekty = (await getCollection("case-studies"))
 			print("python · fastapi · javascript/typescript · astro · htmx · sql · android · ai-assisted dev");
 		} else if (c === "rodo") {
 			print(
-				"Dane z formularza (imię, e-mail, treść) wykorzystuję wyłącznie do odpowiedzi na\n" +
+				"Dane z formularza (imię, e-mail, temat opcjonalnie, treść) wykorzystuję wyłącznie do odpowiedzi na\n" +
 					"Twoje zapytanie — podstawa: mój prawnie uzasadniony interes (art. 6 ust. 1 lit. f\n" +
 					"RODO). Wysyłkę realizuje usługa Resend (USA), która tymczasowo przetwarza treść\n" +
 					"wiadomości w celu jej doręczenia, na podstawie mojej akceptacji ich umowy\n" +
@@ -251,7 +251,7 @@ const projekty = (await getCollection("case-studies"))
 					"możesz też o to poprosić w dowolnym momencie. Masz prawo dostępu, sprostowania,\n" +
 					"usunięcia danych i skargi do Prezesa UODO. Administrator danych: Jakub Turski,\n" +
 					"kontakt: kontakt@justdolt.pl. Serwer zapisuje standardowe logi dostępu (w tym IP)\n" +
-					"w celach bezpieczeństwa.",
+					"w celach bezpieczeństwa. Pełna wersja: /polityka-prywatnosci.",
 			);
 		} else if (c === "kontakt" || c === "napisz" || c === "mail") {
 			print("kreator wiadomości — 3 pytania i gotowe ('anuluj' przerywa).", "text-muted");
