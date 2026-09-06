@@ -88,12 +88,38 @@ const { title, summary, scale, stack, status, codeVisibility, codeNote, repoUrl,
 					<p class="text-accent text-[13px] before:content-['$_'] before:opacity-70">ls screenshots/</p>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						{screenshots.map((s) => (
-							<img src={s.src} alt={s.alt} class="rounded-[3px] border border-line w-full" loading="lazy" />
+							<button
+								type="button"
+								data-lightbox-open
+								class="group relative overflow-hidden rounded-[3px] border border-line focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
+								aria-label={`Powiększ zrzut ekranu: ${s.alt}`}
+							>
+								<img src={s.src} alt={s.alt} class="w-full transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
+								<span class="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink/0 text-[12px] uppercase tracking-wide text-transparent transition-colors group-hover:bg-ink/40 group-hover:text-white">
+									powiększ &#8599;
+								</span>
+							</button>
 						))}
 					</div>
 				</div>
 			)
 		}
+
+		<div
+			data-lightbox
+			hidden
+			class="fixed inset-0 z-50 flex items-center justify-center bg-ink/90 p-6 cursor-zoom-out"
+		>
+			<button
+				type="button"
+				data-lightbox-close
+				aria-label="Zamknij podgląd"
+				class="absolute right-5 top-5 rounded-[3px] border border-line/40 px-3 py-1.5 text-[13px] text-white/80 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[3px]"
+			>
+				&times; zamknij
+			</button>
+			<img data-lightbox-img src="" alt="" class="max-h-[90vh] max-w-[92vw] cursor-default rounded-[3px] object-contain" />
+		</div>
 
 		<div class="flex flex-wrap gap-3.5 border-t border-line pt-10">
 			{
@@ -124,6 +150,37 @@ const { title, summary, scale, stack, status, codeVisibility, codeNote, repoUrl,
 	function init() {
 		const cmd = document.querySelector("article[data-sekcja='case-study'] [data-cmd]");
 		if (cmd) typeCommand(cmd, 14);
+
+		const lightbox = document.querySelector("[data-lightbox]");
+		const lightboxImg = lightbox?.querySelector("[data-lightbox-img]");
+		if (!(lightbox instanceof HTMLElement) || !(lightboxImg instanceof HTMLImageElement)) return;
+
+		function open(src: string, alt: string) {
+			lightboxImg!.src = src;
+			lightboxImg!.alt = alt;
+			lightbox!.hidden = false;
+			document.body.style.overflow = "hidden";
+		}
+
+		function close() {
+			lightbox!.hidden = true;
+			lightboxImg!.src = "";
+			document.body.style.overflow = "";
+		}
+
+		document.querySelectorAll("[data-lightbox-open]").forEach((btn) => {
+			const img = btn.querySelector("img");
+			if (!img) return;
+			btn.addEventListener("click", () => open(img.src, img.alt));
+		});
+
+		lightbox.querySelector("[data-lightbox-close]")?.addEventListener("click", close);
+		lightbox.addEventListener("click", (e) => {
+			if (e.target === lightbox) close();
+		});
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Escape" && !lightbox.hidden) close();
+		});
 	}
 
 	document.addEventListener("astro:page-load", init);
