@@ -230,10 +230,11 @@ const projekty = (await getCollection("case-studies"))
 			navigate(`/case-studies/${projekt.slug}`);
 		} else if (c === "o-mnie" || c === "cat o-mnie.md" || c === "o mnie") {
 			print(
-				"Jakub — samodzielnie rozwijam CRM dla usług związanych z AI Act.\n" +
-					"Wcześniej we wsparciu IT zbudowałem i wdrożyłem Planer, który\n" +
-					"zastąpił ręczną pracę rozproszoną między Excelem, papierem\n" +
-					"i starymi narzędziami.",
+				"Jakub — rozwijam CRM dla usług związanych z AI Act (odpowiadam\n" +
+					"za całą stronę techniczną). Wcześniej we wsparciu IT zbudowałem\n" +
+					"Planer, który miał zastąpić ręczną pracę rozproszoną między\n" +
+					"Excelem, papierem i starymi narzędziami — przeszedł pilotaż\n" +
+					"na serwerze firmy.",
 			);
 		} else if (c === "stack") {
 			print("python · fastapi · javascript/typescript · astro · htmx · sql · android · ai-assisted dev");

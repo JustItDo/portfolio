@@ -1,7 +1,7 @@
 ---
 order: 2
 title: "CRM AI Act"
-summary: "Leady, telefony, audyty i dalsze kroki sprzedaży → samodzielnie rozwijany CRM prowadzący mały zespół przez proces usług związanych ze zgodnością z AI Act."
+summary: "Leady, telefony, audyty i dalsze kroki sprzedaży → rozwijany przeze mnie CRM, który ma prowadzić mały zespół przez proces usług związanych ze zgodnością z AI Act."
 scale: "wewnętrzne narzędzie dla 3-osobowego zespołu"
 stack: ["Python 3.14", "FastAPI", "Jinja2", "htmx", "PostgreSQL 18", "Docker", "Caddy"]
 status: "wdrożony · rozwój trwa"

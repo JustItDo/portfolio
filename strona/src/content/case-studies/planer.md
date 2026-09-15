@@ -1,12 +1,12 @@
 ---
 order: 1
 title: "Planer"
-summary: "Grafik, czas pracy i urlopy rozproszone między WordPressem, Excelem i papierem → jedna aplikacja pracownicza dla blisko 100-osobowego zespołu."
-scale: "wdrożenie dla blisko 100 pracowników"
+summary: "Grafik, czas pracy i urlopy rozproszone między WordPressem, Excelem i papierem → jedna aplikacja pracownicza projektowana dla blisko 100-osobowego zespołu."
+scale: "pilotaż na danych ok. 70 pracowników"
 stack: ["FastAPI", "Jinja2", "htmx", "Alpine.js", "PostgreSQL", "SQLAlchemy"]
-status: "wdrożony · 08.2026"
+status: "pilotaż · 08.2026"
 codeVisibility: "private"
-codeNote: "Repozytorium jest prywatne, ponieważ aplikacja została zbudowana dla wewnętrznych procesów firmy. Na rozmowie mogę omówić architekturę, decyzje techniczne i bezpieczne fragmenty implementacji."
+codeNote: "Repozytorium jest prywatne. Na rozmowie mogę pokazać demo na danych testowych oraz omówić architekturę i decyzje techniczne."
 screenshots:
   - src: "/screenshots/planer/grafik-pracownika.webp"
     alt: "Widok pracownika: własny grafik miesięczny, tylko do odczytu"
@@ -31,8 +31,8 @@ papierowo i mailowo. Każde z tych narzędzi opisywało tylko fragment procesu.
 ## Moja rola
 
 Z własnej inicjatywy przełożyłem realny proces firmy na wymagania, zaprojektowałem
-rozwiązanie, zbudowałem aplikację i przeprowadziłem ją od prototypu do produkcji.
-Odpowiadałem również za testy i wdrożenie. Pracowałem w modelu AI-assisted
+rozwiązanie, zbudowałem aplikację i przeprowadziłem ją od prototypu do pilotażu
+na serwerze firmy. Odpowiadałem również za testy i wdrożenie na serwer. Pracowałem w modelu AI-assisted
 development: podejmowałem decyzje produktowe i techniczne, a wynik weryfikowałem
 w kodzie, testach i na działającym środowisku.
 
@@ -67,12 +67,14 @@ w jednym systemie.
 
 ## Dowody
 
-- wdrożenie produkcyjne dla firmy w sierpniu 2026
+- wdrożenie na serwerze firmy i dwutygodniowy pilotaż w sierpniu 2026 — kierowniczka
+  wprowadziła dane ok. 70 pracowników i zgłaszała uwagi przed startem
 - kolejne migracje i wydania były sprawdzane na realnych danych oraz smoke testami
-- pełna suita przekroczyła 1000 testów uruchamianych na PostgreSQL
+- blisko 1000 testów automatycznych uruchamianych na PostgreSQL
 
 ## Status
 
-Planer został przeze mnie wdrożony produkcyjnie w sierpniu 2026. Po zakończeniu
-współpracy z firmą nie odpowiadam za jego dalszy rozwój ani obecny stan. Publicznie
+W sierpniu 2026 wdrożyłem Planer na serwerze firmy i przeprowadziłem pilotaż.
+Uruchomienie dla wszystkich pracowników nie doszło do skutku — współpraca z firmą
+zakończyła się wcześniej. Kod pozostał przy mnie i dalej go rozwijam. Publicznie
 nie pokazuję nazwy firmy, danych pracowników ani zamkniętego repozytorium.
