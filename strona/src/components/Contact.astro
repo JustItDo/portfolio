@@ -76,12 +76,11 @@ const MAILTO = "kontakt@justdolt.pl";
 			</div>
 
 			<div class="flex">
+				<!-- tyldy vima jako czysta dekoracja w CSS (::before), nie tekst w DOM -->
 				<div
-					class="select-none px-2.5 py-3 text-right text-[13px] leading-[1.7] text-line"
+					class="tyldy select-none px-2.5 py-3 text-right text-[13px] leading-[1.7] text-line"
 					aria-hidden="true"
-				>
-					~<br />~<br />~<br />~<br />~<br />~<br />~
-				</div>
+				></div>
 				<textarea
 					id="kontakt-tresc"
 					name="message"
@@ -100,7 +99,7 @@ const MAILTO = "kontakt@justdolt.pl";
 				lit. f RODO). W procesie wysyłki korzystam
 				z zaufanych narzędzi (Resend, ImprovMX). Szczegóły dotyczące obiegu danych, transferu do
 				USA oraz Twoich praw (m.in. dostępu, usunięcia i sprzeciwu) znajdziesz w{" "}
-				<a href="/polityka-prywatnosci" class="text-accent hover:underline">Polityce Prywatności</a>.
+				<a href="/polityka-prywatnosci" class="text-accent underline underline-offset-4">Polityce Prywatności</a>.
 			</p>
 
 			<div class="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line px-3.5 py-2.5 text-[11.5px] text-muted">
@@ -248,4 +247,5 @@ const MAILTO = "kontakt@justdolt.pl";
 	input, textarea { min-width: 0; }
 	input:focus-visible, textarea:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 	fieldset:disabled { opacity: 0.65; }
+	.tyldy::before { content: "~\A~\A~\A~\A~\A~\A~"; white-space: pre; }
 </style>
